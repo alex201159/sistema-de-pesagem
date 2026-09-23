@@ -36,96 +36,97 @@ class NumericKeyboard extends StatelessWidget {
     ['C', '0', 'OK'],
   ];
 
-  /// Teto absoluto de tamanho de tecla — mesmo numa janela de desktop
-  /// enorme, uma tecla maior que isso deixaria de parecer um botão.
-  static const _absoluteMaxKeySize = 150.0;
+  /// Tetos de tamanho de tecla — mesmo numa janela de desktop enorme,
+  /// uma tecla maior que isso deixaria de parecer um botão.
+  static const _maxKeyWidth = 300.0;
+  static const _maxKeyHeight = 190.0;
+  static const _spacing = 10.0;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calcula o maior tamanho de tecla que cabe no espaço
-        // disponível (3 colunas x 4 linhas, com o mesmo espaçamento
-        // usado entre teclas) — cresce para preencher a coluna/área
-        // disponível (ver escopo, adaptação para telas maiores de
-        // desktop) em vez de ficar travado no tamanho pensado para
-        // tablet. [keySize] só é usado como não há nenhuma dimensão
-        // limitada para calcular a partir dela.
-        // Cada tecla tem `Padding` de 8px na direção correspondente
-        // (horizontal nas colunas, vertical nas linhas) — inclusive nas
-        // pontas (não é só o espaço "entre" teclas) — por isso o total
-        // consumido é `spacing * quantidade`, não `spacing * (quantidade - 1)`.
-        const spacing = 8.0;
-        final candidates = <double>[_absoluteMaxKeySize];
-        if (constraints.hasBoundedWidth) {
-          candidates.add((constraints.maxWidth - spacing * 3) / 3);
-        }
-        if (constraints.hasBoundedHeight) {
-          candidates.add((constraints.maxHeight - spacing * 4) / 4);
-        }
-        if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-          candidates.add(keySize);
-        }
-        final size = candidates.reduce(math.min).clamp(40.0, _absoluteMaxKeySize);
+        // As teclas esticam para preencher a largura/altura disponíveis
+        // (ver escopo, adaptação para telas maiores de desktop), sem
+        // precisar ser quadradas — largura e altura são calculadas
+        // separadamente. [keySize] só entra na direção sem limite (ex.:
+        // dentro de uma rolagem vertical).
+        final width = constraints.hasBoundedWidth
+            ? (constraints.maxWidth - _spacing * 2) / 3
+            : keySize;
+        final height = constraints.hasBoundedHeight
+            ? (constraints.maxHeight - _spacing * 3) / 4
+            : keySize;
+        final keyWidth = width.clamp(48.0, _maxKeyWidth);
+        final keyHeight = height.clamp(48.0, _maxKeyHeight);
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: _layout
-              .map((row) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: row.map((key) => _buildKey(context, key, size)).toList(),
-                    ),
-                  ))
-              .toList(),
+          children: [
+            for (var r = 0; r < _layout.length; r++) ...[
+              if (r > 0) const SizedBox(height: _spacing),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var c = 0; c < _layout[r].length; c++) ...[
+                    if (c > 0) const SizedBox(width: _spacing),
+                    _buildKey(context, _layout[r][c], keyWidth, keyHeight),
+                  ],
+                ],
+              ),
+            ],
+          ],
         );
       },
     );
   }
 
-  Widget _buildKey(BuildContext context, String key, double size) {
+  Widget _buildKey(
+    BuildContext context,
+    String key,
+    double width,
+    double height,
+  ) {
     final isClear = key == 'C';
     final isConfirm = key == 'OK';
 
-    Color background = AppColors.surfaceAlt;
+    Color background = AppColors.surface;
     Color foreground = AppColors.textPrimary;
     if (isClear) {
-      background = AppColors.statusError.withValues(alpha: 0.12);
+      // Cor sólida: translúcida, sumia sobre o fundo escuro da pesagem.
+      background = const Color(0xFFFBE4E4);
       foreground = AppColors.statusError;
     } else if (isConfirm) {
-      background = AppColors.primary;
+      background = AppColors.primaryLight;
       foreground = AppColors.textOnPrimary;
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Material(
-        color: background,
+    return Material(
+      color: background,
+      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          onTap: () {
-            if (isClear) {
-              onClear();
-            } else if (isConfirm) {
-              onConfirm();
-            } else {
-              onDigit(key);
-            }
-          },
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: Center(
-              child: Text(
-                key,
-                style: TextStyle(
-                  fontSize: (size * 0.32).clamp(16.0, 30.0),
-                  fontWeight: FontWeight.bold,
-                  color: foreground,
-                ),
+        onTap: () {
+          if (isClear) {
+            onClear();
+          } else if (isConfirm) {
+            onConfirm();
+          } else {
+            onDigit(key);
+          }
+        },
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Center(
+            child: Text(
+              key,
+              style: TextStyle(
+                fontSize: (math.min(width, height) * 0.36).clamp(18.0, 40.0),
+                fontWeight: FontWeight.w700,
+                color: foreground,
               ),
             ),
           ),

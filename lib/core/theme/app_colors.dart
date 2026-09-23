@@ -43,5 +43,25 @@ class AppColors {
   static const Color weighingBackground = Color(0xFF24352C);
   static const Color weighingSectionLabel = Color(0xFFC3D2CA);
 
+  /// Painéis sobre [weighingBackground] (teclado, preço/kg, produto
+  /// ainda não escolhido) — um tom acima do fundo, sem virar card claro.
+  static const Color weighingPanel = Color(0xFF2F443A);
+  static const Color weighingPanelBorder = Color(0xFF3C5448);
+
+  /// Visor do peso, no estilo do display de uma balança: fundo quase
+  /// preto com dígitos verdes brilhantes.
+  static const Color weighingDisplay = Color(0xFF111B16);
+  static const Color weighingDisplayText = Color(0xFF9BF5AE);
+
+  /// Variantes claras das cores de status, legíveis sobre fundo escuro
+  /// (as de cima são pensadas para fundo claro).
+  static const Color statusOkOnDark = Color(0xFF6FDB82);
+  static const Color statusWarningOnDark = Color(0xFFFFCE54);
+  static const Color statusErrorOnDark = Color(0xFFFF7A7A);
+  static const Color statusInfoOnDark = Color(0xFF74B9FF);
+
+  /// Botão principal da tela de pesagem (imprimir/registrar).
+  static const Color weighingAction = Color(0xFF3FA34D);
+
   static const Color divider = Color(0xFFDDE3E0);
 }
