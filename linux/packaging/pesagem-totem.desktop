@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Sistema de Pesagem
+Comment=Totem de pesagem e impressão de etiquetas
+Exec=/opt/pesagem-totem/pesagem_totem
+Icon=scale
+Terminal=false
+Categories=Office;
+StartupWMClass=com.exattapdv.pesagem_totem
